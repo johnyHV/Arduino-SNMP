@@ -1,0 +1,43 @@
+Usage code https://code.google.com/p/agentuino/
+
+Implemented SNMP trap functions from Enmyerp http://forum.arduino.cc/index.php?topic=50848.60
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+PDU Types
+    GET-Request
+    SET-Request
+    Response
+    Trap (beta test)
+    
+Syntax Types
+    Null
+    Boolean
+    Bits (WIP)
+    Octet-String
+    Object-Identifier (WIP)
+    Integer and Integer32
+    Counter and Counter64
+    Gauge
+    Time-Ticks
+    IP-Address
+    Opaque
+    Network-Service-Access-Point (NSAP) Address
+    
+Limitations
+    Agentuino's limitation is dependent on the amount of SRAM available.
+
+    Maximum Community Names (Get/Set) Length: 20 bytes
+    Maximum Object-Identifier Length: 64 bytes
+    Maximum Value Length: 64 bytes
+    Maximum Packet Length: 153 bytes
+    
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------    
+
+Net-Snmp Get-Request
+
+snmpget -v 1 -r 1 -c public 192.168.2.64 sysUpTime.0
+
+snmpset -v 1 -r 1 -c public 192.168.2.64 sysName.0 s NewName
+
+snmpget -v 1 -r 1 -c public 192.168.2.64 sysName.0
