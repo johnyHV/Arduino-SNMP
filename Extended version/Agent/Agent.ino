@@ -35,19 +35,19 @@ static byte RemoteIP[4] = {158, 193, 86, 46};     // The IP address of the host 
 // .iso.org.dod.internet.mgmt.mib-2 (.1.3.6.1.2.1)
 // .iso.org.dod.internet.mgmt.mib-2.system (.1.3.6.1.2.1.1)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysDescr (.1.3.6.1.2.1.1.1)
-static char sysDescr[] PROGMEM      = "1.3.6.1.2.1.1.1.0";  // read-only  (DisplayString)
+const char sysDescr[] PROGMEM      = "1.3.6.1.2.1.1.1.0";  // read-only  (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysObjectID (.1.3.6.1.2.1.1.2)
-static char sysObjectID[] PROGMEM   = "1.3.6.1.2.1.1.2.0";  // read-only  (ObjectIdentifier)
+const char sysObjectID[] PROGMEM   = "1.3.6.1.2.1.1.2.0";  // read-only  (ObjectIdentifier)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysUpTime (.1.3.6.1.2.1.1.3)
-static char sysUpTime[] PROGMEM     = "1.3.6.1.2.1.1.3.0";  // read-only  (TimeTicks)
+const char sysUpTime[] PROGMEM     = "1.3.6.1.2.1.1.3.0";  // read-only  (TimeTicks)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysContact (.1.3.6.1.2.1.1.4)
-static char sysContact[] PROGMEM    = "1.3.6.1.2.1.1.4.0";  // read-write (DisplayString)
+const char sysContact[] PROGMEM    = "1.3.6.1.2.1.1.4.0";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysName (.1.3.6.1.2.1.1.5)
-static char sysName[] PROGMEM       = "1.3.6.1.2.1.1.5.0";  // read-write (DisplayString)
+const char sysName[] PROGMEM       = "1.3.6.1.2.1.1.5.0";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysLocation (.1.3.6.1.2.1.1.6)
-static char sysLocation[] PROGMEM   = "1.3.6.1.2.1.1.6.0";  // read-write (DisplayString)
+const char sysLocation[] PROGMEM   = "1.3.6.1.2.1.1.6.0";  // read-write (DisplayString)
 // .iso.org.dod.internet.mgmt.mib-2.system.sysServices (.1.3.6.1.2.1.1.7)
-static char sysServices[] PROGMEM   = "1.3.6.1.2.1.1.7.0";  // read-only  (Integer)
+const char sysServices[] PROGMEM   = "1.3.6.1.2.1.1.7.0";  // read-only  (Integer)
 //
 // Arduino defined OIDs
 // .iso.org.dod.internet.private (.1.3.6.1.4)
@@ -204,29 +204,30 @@ void pduReceived()
 void setup()
 {
   Serial.begin(9600);
-  Serial.println("A");
+  Serial.println("CPU Start");
+  
   pinMode(6,INPUT);
+  
   Ethernet.begin(mac);
-  Serial << Ethernet.localIP();
-  //
+  //Ethernet.begin(mac,ip,gateway,subnet);
+  
+  Serial << "IP Adress: " << Ethernet.localIP() << '\n';
+  
   api_status = Agentuino.begin();
-  //
+  
   if ( api_status == SNMP_API_STAT_SUCCESS ) {
-    //
+    
     Agentuino.onPduReceive(pduReceived);
-    //
+    
     delay(10);
-    //
+    
     Serial << F("SNMP Agent Initalized...") << endl;
-    //
+    
     return;
   }
-  //
-  
-  
   
   delay(10);
-  //
+  
   Serial << F("SNMP Agent Initalization Problem...") << status << endl;
 }
 
@@ -235,21 +236,21 @@ void loop()
   // listen/handle for incoming SNMP requests
   Agentuino.listen();
   
+  // Is pin 6 HIGH, send trap
   if (digitalRead(6) == 0) {
     Serial.println("Send TRAP");
-    Agentuino.Trampa("test",RemoteIP, locUpTime);     // You need to specify a message, the remote host and the locUpTime
+    Agentuino.Trampa("Arduino SNMP trap",RemoteIP, locUpTime);     // You need to specify a message, the remote host and the locUpTime
     delay(1000);
     locUpTime = locUpTime + 100;
   }
-  //Serial.println("B");
-  //
+  
   // sysUpTime - The time (in hundredths of a second) since
   // the network management portion of the system was last
   // re-initialized.
   if ( millis() - prevMillis > 1000 ) {
     // increment previous milliseconds
     prevMillis += 1000;
-    //
+    
     // increment up-time counter
     locUpTime += 100;
   }
