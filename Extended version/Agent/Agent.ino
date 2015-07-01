@@ -21,7 +21,7 @@ static byte ip[] = { 192, 168, 2, 64 };
 static byte gateway[] = { 192, 168, 2, 1 };
 static byte subnet[] = { 255, 255, 255, 0 };
 
-static byte RemoteIP[4] = {158, 193, 86, 46};     // The IP address of the host that will receive the trap
+static byte RemoteIP[4] = {192, 168, 2, 60};     // The IP address of the host that will receive the trap
 
 //
 // tkmib - linux mib browser
@@ -59,9 +59,9 @@ const char sysServices[] PROGMEM   = "1.3.6.1.2.1.1.7.0";  // read-only  (Intege
 static char locDescr[]              = "Agentuino, a light-weight SNMP Agent.";  // read-only (static)
 static char locObjectID[]           = "1.3.6.1.3.2009.0";                       // read-only (static)
 static uint32_t locUpTime           = 0;                                        // read-only (static)
-static char locContact[20]          = "Eric Gionet";                            // should be stored/read from EEPROM - read/write (not done for simplicity)
+static char locContact[20]          = "Miroslav Pivovarsky";                    // should be stored/read from EEPROM - read/write (not done for simplicity)
 static char locName[20]             = "Agentuino";                              // should be stored/read from EEPROM - read/write (not done for simplicity)
-static char locLocation[20]         = "Nova Scotia, CA";                        // should be stored/read from EEPROM - read/write (not done for simplicity)
+static char locLocation[20]         = "Zilina, Slovak";                         // should be stored/read from EEPROM - read/write (not done for simplicity)
 static int32_t locServices          = 7;                                        // read-only (static)
 
 uint32_t prevMillis = millis();
