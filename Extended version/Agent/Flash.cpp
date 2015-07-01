@@ -16,19 +16,17 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #include "Flash.h"
 
-_FLASH_STRING::_FLASH_STRING(const prog_char *arr) : _arr(arr) 
-{ }
+_FLASH_STRING::_FLASH_STRING(const prog_char *arr) : _arr(arr) {
+}
 
-void _FLASH_STRING::print(Print &stream) const
-{
-  for (size_t i=0; ; ++i)
-  {
-    char c = (*this)[i];
-    if (!c) break;
-    stream.print(c); // print in char form
-  }
+void _FLASH_STRING::print(Print &stream) const {
+    for (size_t i = 0;; ++i) {
+        char c = (*this)[i];
+        if (!c) break;
+        stream.print(c); // print in char form
+    }
 }

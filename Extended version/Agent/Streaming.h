@@ -15,7 +15,7 @@ Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #ifndef ARDUINO_STREAMING
 #define ARDUINO_STREAMING
@@ -25,16 +25,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define STREAMING_LIBRARY_VERSION 4
 
 // Generic template
-template<class T> 
-inline Print &operator <<(Print &stream, T arg) 
-{ stream.print(arg); return stream; }
 
-struct _BASED 
-{ 
-  long val; 
-  int base;
-  _BASED(long v, int b): val(v), base(b) 
-  {}
+template<class T>
+inline Print &operator<<(Print &stream, T arg) {
+    stream.print(arg);
+    return stream;
+}
+
+struct _BASED {
+    long val;
+    int base;
+
+    _BASED(long v, int b) : val(v), base(b) {
+    }
 };
 
 #define _HEX(a)     _BASED(a, HEX)
@@ -48,8 +51,10 @@ struct _BASED
 // clever technique to allow for expressions like
 //   Serial << _HEX(a);
 
-inline Print &operator <<(Print &obj, const _BASED &arg)
-{ obj.print(arg.val, arg.base); return obj; } 
+inline Print &operator<<(Print &obj, const _BASED &arg) {
+    obj.print(arg.val, arg.base);
+    return obj;
+}
 
 #if ARDUINO >= 18
 // Specialization for class _FLOAT
@@ -58,16 +63,18 @@ inline Print &operator <<(Print &obj, const _BASED &arg)
 // feature like this:
 //   Serial << _FLOAT(gps_latitude, 6); // 6 digits of precision
 
-struct _FLOAT
-{
-  float val;
-  int digits;
-  _FLOAT(double v, int d): val(v), digits(d)
-  {}
+struct _FLOAT {
+    float val;
+    int digits;
+
+    _FLOAT(double v, int d) : val(v), digits(d) {
+    }
 };
 
-inline Print &operator <<(Print &obj, const _FLOAT &arg)
-{ obj.print(arg.val, arg.digits); return obj; }
+inline Print &operator<<(Print &obj, const _FLOAT &arg) {
+    obj.print(arg.val, arg.digits);
+    return obj;
+}
 #endif
 
 // Specialization for enum _EndLineCode
@@ -75,9 +82,13 @@ inline Print &operator <<(Print &obj, const _FLOAT &arg)
 // clever technique to allow for expressions like
 //   Serial << "Hello!" << endl;
 
-enum _EndLineCode { endl };
+enum _EndLineCode {
+    endl
+};
 
-inline Print &operator <<(Print &obj, _EndLineCode arg) 
-{ obj.println(); return obj; }
+inline Print &operator<<(Print &obj, _EndLineCode arg) {
+    obj.println();
+    return obj;
+}
 
 #endif

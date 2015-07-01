@@ -16,7 +16,7 @@
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ */
 
 #include <avr/pgmspace.h>
 #include <Arduino.h>
@@ -24,7 +24,7 @@
 #define FLASH_LIBRARY_VERSION 3
 
 #if (ARDUINO >= 103)
-  #define prog_char  char PROGMEM
+#define prog_char  char PROGMEM
 #endif
 
 // Use these macros to define your flash-based data structures
@@ -49,9 +49,9 @@
   _FLASH_STRING_ARRAY name(name##_arr, sizeof(name##_arr) / sizeof(name##_arr[0]));
 
 #ifndef ARDUINO_CORE_PRINTABLE_SUPPORT
-class _Printable
-{
-  public:
+
+class _Printable {
+public:
     virtual void print(Print &stream) const = 0;
 };
 #endif
@@ -60,164 +60,143 @@ class _Printable
 #define F(str) (_FLASH_STRING(PSTR(str)).Printable())
 
 /* _FLASH_STRING class.  Use the FLASH_STRING() macro to create these, or use inline F() macro. */
-class _FLASH_STRING : public _Printable
-{
-  public:
+class _FLASH_STRING : public _Printable {
+public:
     _FLASH_STRING(const prog_char *arr);
 
-    size_t length() const
-    {
-      return strlen_P(_arr);
+    size_t length() const {
+        return strlen_P(_arr);
     }
 
-    char *copy(char *to, size_t size = -1, size_t offset = 0) const
-    {
-      return size == -1 ?
-             strcpy_P(to, _arr + offset) : strncpy_P(to, _arr + offset, size);
+    char *copy(char *to, size_t size = -1, size_t offset = 0) const {
+        return size == -1 ?
+                strcpy_P(to, _arr + offset) : strncpy_P(to, _arr + offset, size);
     }
 
-    const prog_char *access() const
-    {
-      return _arr;
+    const prog_char *access() const {
+        return _arr;
     }
 
-    const _Printable &Printable() const
-    {
-      return *this;
+    const _Printable &Printable() const {
+        return *this;
     }
 
-    char operator[](int index) const
-    {
-      return static_cast<char>(pgm_read_byte(_arr + index));
+    char operator[](int index) const {
+        return static_cast<char> (pgm_read_byte(_arr + index));
     }
 
     void print(Print &stream) const;
 
-  private:
+private:
     const prog_char *_arr;
 };
 
 /* _FLASH_ARRAY template class.  Use the FLASH_ARRAY() macro to create these. */
 template<class T>
-class _FLASH_ARRAY : public _Printable
-{
+class _FLASH_ARRAY : public _Printable {
     typedef T PROGMEM _DataType;
 
-  public:
-    _FLASH_ARRAY(const _DataType *arr, size_t count) : _arr(arr), _size(count)
-    { }
+public:
 
-    size_t count() const
-    {
-      return _size;
+    _FLASH_ARRAY(const _DataType *arr, size_t count) : _arr(arr), _size(count) {
     }
 
-    const _DataType *access() const
-    {
-      return _arr;
+    size_t count() const {
+        return _size;
     }
 
-    T operator[](int index) const
-    {
-      uint32_t val = 0;
-      if (sizeof(T) == 1)
-        val = pgm_read_byte(_arr + index);
-      else if (sizeof(T) == 2)
-        val = pgm_read_word(_arr + index);
-      else if (sizeof(T) == 4)
-        val = pgm_read_dword(_arr + index);
-      return *reinterpret_cast<T *>(&val);
+    const _DataType *access() const {
+        return _arr;
     }
 
-    void print(Print &stream) const
-    {
-      for (size_t i = 0; i < _size; ++i)
-      {
-        stream.print((*this)[i]);
-        if (i < _size - 1)
-          stream.print(",");
-      }
+    T operator[](int index) const {
+        uint32_t val = 0;
+        if (sizeof (T) == 1)
+            val = pgm_read_byte(_arr + index);
+        else if (sizeof (T) == 2)
+            val = pgm_read_word(_arr + index);
+        else if (sizeof (T) == 4)
+            val = pgm_read_dword(_arr + index);
+        return *reinterpret_cast<T *> (&val);
     }
 
-  private:
+    void print(Print &stream) const {
+        for (size_t i = 0; i < _size; ++i) {
+            stream.print((*this)[i]);
+            if (i < _size - 1)
+                stream.print(",");
+        }
+    }
+
+private:
     const _DataType *_arr;
     size_t _size;
 };
 
 /* _FLASH_TABLE template class.  Use the FLASH_TABLE() macro to create these. */
 template<class T>
-class _FLASH_TABLE : public _Printable
-{
+class _FLASH_TABLE : public _Printable {
     typedef T PROGMEM _DataType;
 
-  public:
-    _FLASH_TABLE(const _DataType *arr, size_t rows, size_t cols) : _arr(arr), _rows(rows), _cols(cols)
-    { }
+public:
 
-    size_t rows() const
-    {
-      return _rows;
+    _FLASH_TABLE(const _DataType *arr, size_t rows, size_t cols) : _arr(arr), _rows(rows), _cols(cols) {
     }
 
-    size_t cols() const
-    {
-      return _cols;
+    size_t rows() const {
+        return _rows;
     }
 
-    const _DataType *access()
-    {
-      return _arr;
+    size_t cols() const {
+        return _cols;
     }
 
-    _FLASH_ARRAY<T> operator[](int index) const
-    {
-      _FLASH_ARRAY<T> row(_arr + index * _cols, _cols);
-      return row;
+    const _DataType *access() {
+        return _arr;
     }
 
-    void print(Print &stream) const
-    {
-      for (int i = 0; i < _rows; ++i)
-      {
-        _FLASH_ARRAY<T> row(_arr + i * _cols, _cols);
-        row.print(stream);
-        stream.println();
-      }
+    _FLASH_ARRAY<T> operator[](int index) const {
+        _FLASH_ARRAY<T> row(_arr + index * _cols, _cols);
+        return row;
     }
 
-  private:
+    void print(Print &stream) const {
+        for (int i = 0; i < _rows; ++i) {
+            _FLASH_ARRAY<T> row(_arr + i * _cols, _cols);
+            row.print(stream);
+            stream.println();
+        }
+    }
+
+private:
     const _DataType *_arr;
     size_t _rows, _cols;
 };
 
 /* _FLASH_STRING_ARRAY class.  Use the FLASH_STRING_ARRAY() macro to create these. */
-class _FLASH_STRING_ARRAY : public _Printable
-{
-  public:
-    _FLASH_STRING_ARRAY(const prog_char **arr, size_t count) : _arr(arr), _size(count)
-    { }
+class _FLASH_STRING_ARRAY : public _Printable {
+public:
 
-    size_t count() const
-    {
-      return _size;
+    _FLASH_STRING_ARRAY(const prog_char **arr, size_t count) : _arr(arr), _size(count) {
     }
 
-    _FLASH_STRING operator[](int index) const
-    {
-      return _FLASH_STRING(_arr[index]);
+    size_t count() const {
+        return _size;
     }
 
-    void print(Print &stream) const
-    {
-      for (size_t i = 0; i < _size; ++i)
-      {
-        _FLASH_STRING str(_arr[i]);
-        str.print(stream);
-        stream.println();
-      }
+    _FLASH_STRING operator[](int index) const {
+        return _FLASH_STRING(_arr[index]);
     }
 
-  private:
+    void print(Print &stream) const {
+        for (size_t i = 0; i < _size; ++i) {
+            _FLASH_STRING str(_arr[i]);
+            str.print(stream);
+            stream.println();
+        }
+    }
+
+private:
     const prog_char **_arr;
     size_t _size;
 };
@@ -226,43 +205,37 @@ class _FLASH_STRING_ARRAY : public _Printable
 #define ARDUINO_STREAMING
 
 template<class T>
-inline Print &operator <<(Print &stream, T arg)
-{
-  stream.print(arg);
-  return stream;
+inline Print &operator<<(Print &stream, T arg) {
+    stream.print(arg);
+    return stream;
 }
 
 #endif
 
-inline Print &operator <<(Print &stream, const _Printable &printable)
-{
-  printable.print(stream);
-  return stream;
+inline Print &operator<<(Print &stream, const _Printable &printable) {
+    printable.print(stream);
+    return stream;
 }
 
-inline Print &operator <<(Print &stream, const _FLASH_STRING &printable)
-{
-  printable.print(stream);
-  return stream;
-}
-
-template<class T>
-inline Print &operator <<(Print &stream, const _FLASH_ARRAY<T> &printable)
-{
-  printable.print(stream);
-  return stream;
+inline Print &operator<<(Print &stream, const _FLASH_STRING &printable) {
+    printable.print(stream);
+    return stream;
 }
 
 template<class T>
-inline Print &operator <<(Print &stream, const _FLASH_TABLE<T> &printable)
-{
-  printable.print(stream);
-  return stream;
+inline Print &operator<<(Print &stream, const _FLASH_ARRAY<T> &printable) {
+    printable.print(stream);
+    return stream;
 }
 
-inline Print &operator <<(Print &stream, const _FLASH_STRING_ARRAY &printable)
-{
-  printable.print(stream);
-  return stream;
+template<class T>
+inline Print &operator<<(Print &stream, const _FLASH_TABLE<T> &printable) {
+    printable.print(stream);
+    return stream;
+}
+
+inline Print &operator<<(Print &stream, const _FLASH_STRING_ARRAY &printable) {
+    printable.print(stream);
+    return stream;
 }
 
