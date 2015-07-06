@@ -172,7 +172,8 @@ typedef struct SNMP_OID {
     size_t size;
     //
 
-    void fromString(const char *buffer) {
+    byte * fromString(const char *buffer) {
+
         if (buffer[0] == '1' && buffer[1] == '.' && buffer[2] == '3' && buffer[3] == '.') {
             memset(data, 0, SNMP_MAX_OID_LEN);
             data[0] = 0x2B;
@@ -238,6 +239,8 @@ typedef struct SNMP_OID {
 
             fs_id++;
             size = fs_id;
+
+            return data;
         }
     }
     //
@@ -597,7 +600,8 @@ public:
     SNMP_API_STAT_CODES requestPdu(SNMP_PDU *pdu);
     SNMP_API_STAT_CODES responsePdu(SNMP_PDU *pdu);
     void onPduReceive(onPduReceiveCallback pduReceived);
-    void Trampa(char Mensaje[], byte RemIP[4], uint32_t Tiempo); // This is the line you must add
+    void Trap(char Message[], byte RemIP[4], uint32_t Time,
+            char enterprise_oid[] = "1.3.6.1.4.1.36061.0", char oid_[] = "1.3.6.1.4.1.36061.3.1.1.1"); // This is the line you must add
     void freePdu(SNMP_PDU *pdu);
 
     // Helper functions

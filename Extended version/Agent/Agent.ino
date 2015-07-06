@@ -16,6 +16,8 @@
 #include "MIB.h"
 #include "Variable.h"
 
+IPAddress address;
+
 static byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF};
 static byte ip[] = {192, 168, 2, 64};
 static byte gateway[] = {192, 168, 2, 1};
@@ -26,17 +28,22 @@ static byte RemoteIP[4] = {192, 168, 2, 60}; // The IP address of the host that 
 void setup() {
     Serial.begin(9600);
     Serial.println("CPU Start");
-    locUpTime = 0;
 
     pinMode(6, INPUT);
 
     Ethernet.begin(mac);
     //Ethernet.begin(mac,ip,gateway,subnet);
 
-    Serial << "IP Adress: " << Ethernet.localIP() << '\n';
-
+    IPAddress address = Ethernet.localIP();
+    for (uint8_t i=0;i<=4;i++) {
+        my_IP_address[i] = address[i];
+        Serial.print(my_IP_address[i]);
+        Serial.print(".");
+    }
+    Serial.println("");
+    
     api_status = Agentuino.begin();
-
+    
     if (api_status == SNMP_API_STAT_SUCCESS) {
 
         Agentuino.onPduReceive(pduReceived);
@@ -60,9 +67,9 @@ void loop() {
     // Is pin 6 HIGH, send trap
     if (digitalRead(6) == 0) {
         Serial.println("Send TRAP");
-        Agentuino.Trampa("Arduino SNMP trap", RemoteIP, locUpTime); // You need to specify a message, the remote host and the locUpTime
+        Agentuino.Trap("Arduino SNMP trap", RemoteIP, locUpTime); // You need to specify a message, the remote host and the locUpTime
         delay(1000);
-        //locUpTime = locUpTime + 100;
+        locUpTime = locUpTime + 100;
     }
 
     // sysUpTime - The time (in hundredths of a second) since
