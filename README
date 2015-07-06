@@ -4,13 +4,18 @@ Implemented SNMP trap functions from Enmyerp http://forum.arduino.cc/index.php?t
 
 @EDIT M. Pivovarsky  <miroslav.pivovarsky@gmail.com>
 
+Extended version - with memory library
+Simple version - without memory library 
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SNMP v1
 
 PDU Types
     GET-Request
     SET-Request
     Response
-    Trap (beta test)
+    Trap
     
 Syntax Types
     Null
@@ -39,6 +44,8 @@ Limitations
 Net-Snmp Get-Request
 
 snmpget -v 1 -r 1 -c public 192.168.2.64 sysUpTime.0
+
+Net-Snmp Set
 
 snmpset -v 1 -r 1 -c public 192.168.2.64 sysName.0 s NewName
 
