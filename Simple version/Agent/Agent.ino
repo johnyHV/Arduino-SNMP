@@ -66,7 +66,9 @@ void loop() {
     // Is pin 6 HIGH, send trap
     if (digitalRead(6) == 0) {
         Serial.println("Send TRAP");
-        Agentuino.Trap("Arduino SNMP trap", RemoteIP, locUpTime); // You need to specify a message, the remote host and the locUpTime
+        //Agentuino.Trap("test", RemoteIP, locUpTime, "1.3.6.1.4.1.28032.1.1.1", "1.3.6.1.2.1.1.1.0"); // You need to specify a message, the remote host and the locUpTime
+        //Agentuino.Trap("Arduino SNMP trap", RemoteIP, locUpTime, "1.3.6.1.4.1.28032.1.1.1");
+        Agentuino.Trap("Arduino SNMP trap", RemoteIP, locUpTime, "1.3.6.1.4.1.36061.0", "1.3.6.1.4.1.36061.3.1.1.1");
         delay(1000);
         locUpTime = locUpTime + 100;
     }

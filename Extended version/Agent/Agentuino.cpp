@@ -26,7 +26,6 @@
 
 #include "Agentuino.h"
 #include "EthernetUdp.h"
-#include "MemoryFree.h"
 
 EthernetUDP Udp;
 
@@ -368,6 +367,95 @@ void AgentuinoClass::freePdu(SNMP_PDU *pdu) {
     free((char *) pdu);
 }
 
+
+// usage BER encoding
+/*
+
+TRAP PDU
+The example TRAP above MIB file.
+Community String is "public"
+Agent's IPAddress is 192.168.1.128
+Timestamp is 123456
+The operMasterControl OID is in TRAP that has value is 1
+  +---------+-----------+-------------------------------------------------------------------------------------------------------+-------------------+
+  | SNMP    | Type      |                                           0x30                                                        |Sequence           |
+  | message +-----------+-------------------------------------------------------------------------------------------------------+-------------------+
+  |         | Length    |                                           0x82 0x00 0x44                                              |Length: 68         |
+  |         +-----------+-------------------------------------------------------------------------------------------------------+-------------------+
+  |         | Version   |                                           0x02                                                        |Integer            |
+  |         |           |                                           0x01                                                        |Length: 1          |
+  |         |           |                                           0x00                                                        |Value: 0           |
+  |         +-----------+-------------------------------------------------------------------------------------------------------+-------------------+
+  |         | Community |                                           0x04                                                        |Octet String       |
+  |         |           |                                           0x06                                                        |Length: 6          |
+  |         |           |                                           0x70 0x75 0x62 0x6C 0x69 0x63                               |Value: public      |
+  |         +-----------+ -------+------------+---------------------------------------------------------------------------------+-------------------+
+  |         | Data      | SNMPv1 | PDU type   |                     0xA4                                                        |TRAP PDU           |
+  |         |           | PDU    +------------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | PDU length |                     0x82 0x00 0x35                                              |Length: 53         |
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | Enterprise |                     0x06                                                        |Object identifier  |
+  |         |           |        | OID        |                     0x09                                                        |Length: 9          |
+  |         |           |        |            |                     0x2B 0x06 0x01 0x04 0x01 0x82 0x99 0x5D 0x00                |Value:             |
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | Agent      |                     0x40                                                        |IpAddress          |
+  |         |           |        | Address    |                     0x04                                                        |Length: 4          |
+  |         |           |        |            |                     0xC0 0xA8 0x01 0x80                                         |Value:192.168.1.128|
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | Generic    |                     0x02                                                        |Integer            |
+  |         |           |        | Trap Type  |                     0x01                                                        |Length: 1          |
+  |         |           |        |            |                     0x06                                                        |Value: 6           |
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | Specific   |                     0x02                                                        |Integer            |
+  |         |           |        | Trap       |                     0x01                                                        |Length: 1          |
+  |         |           |        | Number     |                     0x01                                                        |Value: 1           |
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | Time       |                     0x43                                                        |TimeTicks          |
+  |         |           |        | Stamp      |                     0x03                                                        |Length: 3          |
+  |         |           |        |            |                     0x01 0xE2 0x40                                              |Value: 123456      |
+  |         |           |        + -----------+---------------------------------------------------------------------------------+-------------------+
+  |         |           |        | VarBind    |                     0x30                                                        |Sequence           |
+  |         |           |        | List       +-----------+---------------------------------------------------------------------+-------------------+
+  |         |           |        |            | Length    |         0x82 0x00 0x15                                              |Length: 21         |
+  |         |           |        |            +-----------+---------------------------------------------------------------------+ ------------------+
+  |         |           |        |            | VarBind 1 |         0x30                                                        |Sequence           |
+  |         |           |        |            |           +-------+-------------------------------------------------------------+-------------------+
+  |         |           |        |            |           | Len 1 | 0x82 0x00 0x11                                              |Length: 17         |
+  |         |           |        |            |           +-------+-------------------------------------------------------------+-------------------+
+  |         |           |        |            |           | OID 1 | 0x06                                                        |Object identifier  |
+  |         |           |        |            |           |       | 0x0C                                                        |Length: 12         |
+  |         |           |        |            |           |       | 0x2B 0x06 0x01 0x04 0x01 0x82 0x99 0x5D 0x03 0x01 0x01 0x01 |Value:             |
+  |         |           |        |            |           +-------+-------------------------------------------------------------+-------------------+
+  |         |           |        |            |           | Value | 0x02                                                        |Integer            |
+  |         |           |        |            |           | 1     | 0x01                                                        |Length: 1          |
+  |         |           |        |            |           |       | 0x01                                                        |Length: 1          |
+  +---------+-----------+--------+------------+-----------+-------+-------------------------------------------------------------+-------------------+
+
+
+  Data type identifier in SNMP
+     Data type                 Identifier      Note
+     Integer                      0x02         Primitive ASN.1 types
+     Octet String                 0x04         Primitive ASN.1 types  
+     Null                         0x05         Primitive ASN.1 types
+     Object identifier            0x06         Primitive ASN.1 types
+     Sequence                     0x30         Constructed ASN.1 types
+     IpAddress                    0x40         Primitive SNMP application types
+     Counter                      0x41         Primitive SNMP application types
+     Gauge                        0x42         Primitive SNMP application types
+     TimeTicks                    0x43         Primitive SNMP application types 
+     Opaque                       0x44         Primitive SNMP application types
+     NsapAddress                  0x45         Primitive SNMP application types
+     GetRequest PDU               0xA0         Context-specific Constructed SNMP types
+     GetNextRequest PDU           0xA1         Context-specific Constructed SNMP types
+     GetResponse PDU              0xA2         Context-specific Constructed SNMP types
+     SetRequest PDU               0xA3         Context-specific Constructed SNMP types
+     Trap PDU                     0xA4         Context-specific Constructed SNMP types
+
+http://www.rane.com/note161.html
+http://www.opencircuits.com/SNMP_MIB_Implementation#Binary_File_Format_.3Cname.3E_trap.bin
+http://wiki.tcl.tk/16631
+ */
+
 /**
  *
  * @info function for send SNMP TRAP
@@ -397,16 +485,17 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
         Comunity_string[i] = (int) _getCommName[i - 2];
 
     // type = trap-pdu, 82, 0, leng = long as the other message
-    byte PDU_type_and_leng[4] = {164, 130, 0, 53 + strlen(Message)}; // + strlen(enterprise_oid)
+    byte PDU_type_and_leng[4] = {164, 130, 0, 53 + strlen(Message)};
 
     // type = identifier, leng = leng oid, value = oid
-    byte *enterprise_oid_dec = oid.fromString(enterprise_oid);
-    
-    byte OID[2 + strlen((const char *) enterprise_oid_dec)+1];
-    OID[0] = 6;
-    OID[1] = strlen((const char *) enterprise_oid_dec)+1;
+    size_t oid_size = 0;
+    byte *enterprise_oid_dec = oid.fromString(enterprise_oid, oid_size);
 
-    for (int i = 2; i < strlen((const char *) enterprise_oid_dec) + 2; i++)
+    byte OID[2 + oid_size];
+    OID[0] = 6;
+    OID[1] = oid_size;
+
+    for (int i = 2; i < oid_size + 2; i++)
         OID[i] = enterprise_oid_dec[i - 2];
 
     // type = IP, leng = 4, value - IP sender
@@ -452,20 +541,31 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
     byte Var_Bind1[4] = {48, 130, 0, 16 + strlen(Message)}; // Here is defined the size
 
     // type = intetifier, leng = leng oid, value = oid
-    byte *oid_dec = oid.fromString(oid_);
+    oid_size = 0;
+    byte *oid_dec = oid.fromString(oid_, oid_size);
 
-    byte OID1[2+strlen((const char *) oid_dec)];
-    OID1[0] = 6; 
-    OID1[1] = strlen((const char *) oid_dec);
+    byte OID1[2 + oid_size];
+    OID1[0] = 6;
+    OID1[1] = oid_size;
 
-    for (int i = 2; i < strlen((const char *) oid_dec)+2; i++)
-        OID1[i] = oid_dec[i-2];
+    for (int i = 2; i < oid_size + 2; i++)
+        OID1[i] = oid_dec[i - 2];
 
     // type = octetstring, leng = long as the other message, value = message
     byte Value1[2] = {4, strlen(Message)};
 
     Type_and_leng[1] = sizeof (Version) / sizeof (Version[0]) + sizeof (Comunity_string) / sizeof (Comunity_string[0])
             + sizeof (PDU_type_and_leng) / sizeof (PDU_type_and_leng[0]) + sizeof (OID) / sizeof (OID[0])
+            + sizeof (IP_definition) / sizeof (IP_definition[0]) + sizeof (my_IP_address) / sizeof (my_IP_address[0])
+            + sizeof (Type_Trap) / sizeof ( Type_Trap[0]) + sizeof (extra_OID) / sizeof ( extra_OID[0])
+            + sizeof (Type_time_stick) / sizeof ( Type_time_stick[0]) + sizeof (hexadecimalNumber) / sizeof ( hexadecimalNumber[0])
+            + sizeof (Var_Bind) / sizeof ( Var_Bind[0]) + sizeof (Var_Bind1) / sizeof ( Var_Bind1[0])
+            + sizeof (OID1) / sizeof ( OID1[0]) + sizeof (Value1) / sizeof (Value1[0]) + strlen(Message);
+
+    Var_Bind[3] = 6 + strlen(Message) + (sizeof (OID1) / sizeof ( OID1[0]));
+    Var_Bind1[3] = 2 + strlen(Message) + (sizeof (OID1) / sizeof ( OID1[0]));
+
+    PDU_type_and_leng[3] = sizeof (OID) / sizeof (OID[0])
             + sizeof (IP_definition) / sizeof (IP_definition[0]) + sizeof (my_IP_address) / sizeof (my_IP_address[0])
             + sizeof (Type_Trap) / sizeof ( Type_Trap[0]) + sizeof (extra_OID) / sizeof ( extra_OID[0])
             + sizeof (Type_time_stick) / sizeof ( Type_time_stick[0]) + sizeof (hexadecimalNumber) / sizeof ( hexadecimalNumber[0])
@@ -486,7 +586,7 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
     Udp.write(hexadecimalNumber, 4);
     Udp.write(Var_Bind, 4);
     Udp.write(Var_Bind1, 4);
-    Udp.write(OID1, sizeof(OID1)/sizeof(OID1[0]));
+    Udp.write(OID1, sizeof (OID1) / sizeof (OID1[0]));
     Udp.write(Value1, 2);
     Udp.write(Message, strlen(Message));
     Udp.endPacket();
@@ -514,8 +614,6 @@ void pduReceived() {
     //
 #ifdef DEBUG
     Serial.print(F("UDP Packet Received Start.."));
-    Serial.print(F(" RAM:"));
-    Serial.print(freeMemory());
 #endif
     //
     api_status = Agentuino.requestPdu(&pdu);
@@ -657,5 +755,4 @@ void pduReceived() {
     //
     Agentuino.freePdu(&pdu);
     //
-    //Serial << "UDP Packet Received End.." << " RAM:" << freeMemory() << endl;
 }

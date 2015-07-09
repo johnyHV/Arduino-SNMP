@@ -172,7 +172,7 @@ typedef struct SNMP_OID {
     size_t size;
     //
 
-    byte * fromString(const char *buffer) {
+    byte * fromString(const char *buffer, size_t &size_array) {
 
         if (buffer[0] == '1' && buffer[1] == '.' && buffer[2] == '3' && buffer[3] == '.') {
             memset(data, 0, SNMP_MAX_OID_LEN);
@@ -239,7 +239,8 @@ typedef struct SNMP_OID {
 
             fs_id++;
             size = fs_id;
-
+            size_array = size;
+            
             return data;
         }
     }

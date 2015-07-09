@@ -454,7 +454,7 @@ The operMasterControl OID is in TRAP that has value is 1
 http://www.rane.com/note161.html
 http://www.opencircuits.com/SNMP_MIB_Implementation#Binary_File_Format_.3Cname.3E_trap.bin
 http://wiki.tcl.tk/16631
-*/
+ */
 
 /**
  *
@@ -485,16 +485,17 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
         Comunity_string[i] = (int) _getCommName[i - 2];
 
     // type = trap-pdu, 82, 0, leng = long as the other message
-    byte PDU_type_and_leng[4] = {164, 130, 0, 53 + strlen(Message)}; // + strlen(enterprise_oid)
+    byte PDU_type_and_leng[4] = {164, 130, 0, 53 + strlen(Message)};
 
     // type = identifier, leng = leng oid, value = oid
-    byte *enterprise_oid_dec = oid.fromString(enterprise_oid);
-    
-    byte OID[2 + strlen((const char *) enterprise_oid_dec)+1];
-    OID[0] = 6;
-    OID[1] = strlen((const char *) enterprise_oid_dec)+1;
+    size_t oid_size = 0;
+    byte *enterprise_oid_dec = oid.fromString(enterprise_oid, oid_size);
 
-    for (int i = 2; i < strlen((const char *) enterprise_oid_dec) + 2; i++)
+    byte OID[2 + oid_size];
+    OID[0] = 6;
+    OID[1] = oid_size;
+
+    for (int i = 2; i < oid_size + 2; i++)
         OID[i] = enterprise_oid_dec[i - 2];
 
     // type = IP, leng = 4, value - IP sender
@@ -540,20 +541,31 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
     byte Var_Bind1[4] = {48, 130, 0, 16 + strlen(Message)}; // Here is defined the size
 
     // type = intetifier, leng = leng oid, value = oid
-    byte *oid_dec = oid.fromString(oid_);
+    oid_size = 0;
+    byte *oid_dec = oid.fromString(oid_, oid_size);
 
-    byte OID1[2+strlen((const char *) oid_dec)];
-    OID1[0] = 6; 
-    OID1[1] = strlen((const char *) oid_dec);
+    byte OID1[2 + oid_size];
+    OID1[0] = 6;
+    OID1[1] = oid_size;
 
-    for (int i = 2; i < strlen((const char *) oid_dec)+2; i++)
-        OID1[i] = oid_dec[i-2];
+    for (int i = 2; i < oid_size + 2; i++)
+        OID1[i] = oid_dec[i - 2];
 
     // type = octetstring, leng = long as the other message, value = message
     byte Value1[2] = {4, strlen(Message)};
 
     Type_and_leng[1] = sizeof (Version) / sizeof (Version[0]) + sizeof (Comunity_string) / sizeof (Comunity_string[0])
             + sizeof (PDU_type_and_leng) / sizeof (PDU_type_and_leng[0]) + sizeof (OID) / sizeof (OID[0])
+            + sizeof (IP_definition) / sizeof (IP_definition[0]) + sizeof (my_IP_address) / sizeof (my_IP_address[0])
+            + sizeof (Type_Trap) / sizeof ( Type_Trap[0]) + sizeof (extra_OID) / sizeof ( extra_OID[0])
+            + sizeof (Type_time_stick) / sizeof ( Type_time_stick[0]) + sizeof (hexadecimalNumber) / sizeof ( hexadecimalNumber[0])
+            + sizeof (Var_Bind) / sizeof ( Var_Bind[0]) + sizeof (Var_Bind1) / sizeof ( Var_Bind1[0])
+            + sizeof (OID1) / sizeof ( OID1[0]) + sizeof (Value1) / sizeof (Value1[0]) + strlen(Message);
+
+    Var_Bind[3] = 6 + strlen(Message) + (sizeof (OID1) / sizeof ( OID1[0]));
+    Var_Bind1[3] = 2 + strlen(Message) + (sizeof (OID1) / sizeof ( OID1[0]));
+
+    PDU_type_and_leng[3] = sizeof (OID) / sizeof (OID[0])
             + sizeof (IP_definition) / sizeof (IP_definition[0]) + sizeof (my_IP_address) / sizeof (my_IP_address[0])
             + sizeof (Type_Trap) / sizeof ( Type_Trap[0]) + sizeof (extra_OID) / sizeof ( extra_OID[0])
             + sizeof (Type_time_stick) / sizeof ( Type_time_stick[0]) + sizeof (hexadecimalNumber) / sizeof ( hexadecimalNumber[0])
@@ -574,7 +586,7 @@ void AgentuinoClass::Trap(char Message[], byte RemIP[4], uint32_t Time, char ent
     Udp.write(hexadecimalNumber, 4);
     Udp.write(Var_Bind, 4);
     Udp.write(Var_Bind1, 4);
-    Udp.write(OID1, sizeof(OID1)/sizeof(OID1[0]));
+    Udp.write(OID1, sizeof (OID1) / sizeof (OID1[0]));
     Udp.write(Value1, 2);
     Udp.write(Message, strlen(Message));
     Udp.endPacket();
