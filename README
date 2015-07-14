@@ -47,6 +47,6 @@ snmpget -v 1 -r 1 -c public 192.168.2.64 sysUpTime.0
 
 Net-Snmp Set
 
-snmpset -v 1 -r 1 -c public 192.168.2.64 sysName.0 s NewName
+snmpset -v 1 -r 1 -c private 192.168.2.64 sysName.0 s NewName
 
 snmpget -v 1 -r 1 -c public 192.168.2.64 sysName.0
